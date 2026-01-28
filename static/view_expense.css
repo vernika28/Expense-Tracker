@@ -1,0 +1,72 @@
+body {
+    background-color: #f8fafc;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  .summary-card {
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    transition: 0.3s ease;
+  }
+  
+  .summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .bg-gradient1 {
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+  }
+  .bg-gradient2 {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  }
+  .bg-gradient3 {
+    background: linear-gradient(135deg, #28a745, #6dd5ed);
+  }
+  
+  .filter-bar select,
+  .filter-bar input {
+    border-radius: 10px;
+  }
+  
+  .table {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  
+  .table thead {
+    font-weight: 600;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f1f9ff;
+  }
+  
+  .btn-action {
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .btn-action i {
+    font-size: 18px;
+    transition: 0.2s ease;
+  }
+  
+  .btn-edit i {
+    color: #007bff;
+  }
+  
+  .btn-delete i {
+    color: #dc3545;
+  }
+  
+  .btn-action:hover i {
+    transform: scale(1.1);
+  }
+  
+  td {
+    vertical-align: middle !important;
+    text-align: center;
+  }
