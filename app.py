@@ -2,12 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 import sqlite3
+import os   # ✅ Added for environment variables
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-bcrypt = Bcrypt(app)
 
-DATABASE = 'expense.db'
+# ✅ Use environment variables for better security and deployment compatibility
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
+DATABASE = os.environ.get('DATABASE_PATH', 'expense.db')
+
+bcrypt = Bcrypt(app)
 
 # ------------------ HELPER FUNCTIONS ------------------ #
 def get_db_connection():
@@ -93,7 +96,6 @@ def dashboard():
     )
     expenses = cursor.fetchall()
 
-
     expenses_dict = [
         {
             "id": row["id"],
@@ -112,42 +114,13 @@ def dashboard():
     for e in expenses_dict:
         category_totals[e["category"]] = category_totals.get(e["category"], 0) + e["amount"]
 
- 
     cursor.execute(
         "SELECT amount FROM budget WHERE user_id=? AND month=? AND year=?",
         (session['user_id'], month_name, year)
     )
     budget_row = cursor.fetchone()
-    user_budget = float(budget_row["amount"]) if budget_row else 0.0  # <-- important
+    user_budget = float(budget_row["amount"]) if budget_row else 0.0
     remaining = user_budget - total_spent if user_budget > 0 else 0.0
-
-    conn.close()
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        expenses_json=expenses_dict, 
-        category_totals=category_totals, 
-        total_spent=total_spent,
-        user_budget=user_budget, 
-        remaining=remaining 
-    )
-
-
-    # -------- CATEGORY TOTALS --------
-    category_totals = {}
-    for e in expenses_dict:
-        category_totals[e["category"]] = category_totals.get(e["category"], 0) + e["amount"]
-
-    # -------- GET BUDGET --------
-    cursor.execute(
-        "SELECT * FROM budget WHERE user_id=? AND month=? AND year=?",
-        (session['user_id'], month_name, year)
-    )
-    budget_row = cursor.fetchone()
-    user_budget = float(budget_row["amount"]) if budget_row else None
-
-    remaining = user_budget - total_spent if user_budget else None
 
     conn.close()
 
@@ -198,7 +171,6 @@ def view_expense():
     cursor.execute("SELECT * FROM expense WHERE user_id=?", (session['user_id'],))
     expenses = cursor.fetchall()
 
-    # Convert SQLite Row objects to dictionaries
     expenses_list = [
         {
             "id": e["id"],
@@ -222,7 +194,7 @@ def view_expense():
 
     return render_template(
         "view_expense.html",
-        expenses=expenses_list,  
+        expenses=expenses_list,
         total_spent=total_spent,
         highest_expense=highest_expense,
         total_transactions=total_transactions
@@ -267,7 +239,6 @@ def edit_expense(expense_id):
     conn.close()
     return render_template("edit_expense.html", expense=expense)
 
-
 # --------- DELETE EXPENSE ---------
 @app.route('/delete-expense/<int:expense_id>', methods=['POST'])
 def delete_expense(expense_id):
@@ -276,7 +247,6 @@ def delete_expense(expense_id):
 
     conn = get_db_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         "SELECT * FROM expense WHERE id=? AND user_id=?",
         (expense_id, session['user_id'])
@@ -296,7 +266,6 @@ def update_budget():
     if 'user_id' not in session:
         return jsonify({"success": False, "message": "User not logged in"})
 
-   
     data = request.get_json(force=True)
     if not data or "budget" not in data:
         return jsonify({"success": False, "message": "No budget provided"})
@@ -316,7 +285,6 @@ def update_budget():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-  
     cursor.execute(
         "SELECT id FROM budget WHERE user_id=? AND month=? AND year=?",
         (user_id, month, year)
@@ -336,9 +304,7 @@ def update_budget():
 
     conn.commit()
     conn.close()
-
     return jsonify({"success": True, "message": "Budget updated successfully"})
-
 
 # --------- LOGOUT ---------
 @app.route('/logout')
@@ -349,4 +315,3 @@ def logout():
 # ------------------ RUN APP ------------------ #
 if __name__ == '__main__':
     app.run(debug=True)
-
